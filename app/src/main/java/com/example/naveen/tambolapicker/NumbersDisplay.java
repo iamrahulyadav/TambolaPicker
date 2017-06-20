@@ -93,14 +93,6 @@ public class NumbersDisplay extends AppCompatActivity {
         animator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                if (position != 0) {
-                    textViewList.get(num[position - 1] - 1).setBackgroundResource(R.drawable.complete_background);
-                    textViewList.get(num[position - 1] - 1).setTextColor(Color.WHITE);
-                }
-                numberDisplayText.setText(String.valueOf(num[position]));
-                textViewList.get(num[position] - 1).setBackgroundResource(R.drawable.current_background);
-                textViewList.get(num[position] - 1).setTypeface(Typeface.DEFAULT_BOLD);
-                position += 1;
             }
 
             @Override
@@ -110,27 +102,11 @@ public class NumbersDisplay extends AppCompatActivity {
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                Log.i(TAG, "position1 = " + position);
-                editor.putInt("position", position);
-                editor.apply();
-
             }
 
             @Override
             public void onAnimationRepeat(Animator animation) {
-                if (position < num.length) {
-                    Log.i(TAG, "Position = " + position);
-                    textViewList.get(num[position - 1] - 1).setBackgroundResource(R.drawable.complete_background);
-                    textViewList.get(num[position - 1] - 1).setTextColor(Color.WHITE);
-                    numberDisplayText.setText(String.valueOf(num[position]));
-                    textViewList.get(num[position] - 1).setBackgroundResource(R.drawable.current_background);
-                    textViewList.get(num[position] - 1).setTypeface(Typeface.DEFAULT_BOLD);
-                    position += 1;
-                    if (position >= num.length) {
-                        stopAnimation();
-                    }
-                }
-
+                changeNumber(false);
             }
         });
         //Check if autoSwitch is on or off
@@ -273,12 +249,14 @@ public class NumbersDisplay extends AppCompatActivity {
     }
 
     public void nextButtonMethod(View view) {
+        changeNumber(true);
+    }
+
+    public void changeNumber(boolean fromNext) {
         if (position < num.length) {
-            try {
+            if (position > 0) {
                 textViewList.get(num[position - 1] - 1).setBackgroundResource(R.drawable.complete_background);
                 textViewList.get(num[position - 1] - 1).setTextColor(Color.WHITE);
-            } catch (Exception ignored) {
-
             }
             numberDisplayText.setText(String.valueOf(num[position]));
             textViewList.get(num[position] - 1).setBackgroundResource(R.drawable.current_background);
@@ -287,7 +265,11 @@ public class NumbersDisplay extends AppCompatActivity {
             editor.putInt("position", position);
             editor.commit();
             if (position >= num.length) {
-                Toast.makeText(this, "All the numbers got completed", Toast.LENGTH_LONG).show();
+                if (fromNext) {
+                    Toast.makeText(this, "All the numbers got completed", Toast.LENGTH_LONG).show();
+                } else {
+                    stopAnimation();
+                }
             }
         }
 
