@@ -50,4 +50,5 @@ public class TambolaNumberPicker extends AppCompatActivity {
         sessionSharedPrefs.setPosition(0);
         sessionSharedPrefs.setAutoSwitch(true);
     }
+
 }

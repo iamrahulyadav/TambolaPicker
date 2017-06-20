@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.TransitionManager;
 import android.util.Log;
@@ -26,9 +27,11 @@ import android.widget.Toast;
 
 import com.example.naveen.tambolapicker.R;
 import com.example.naveen.tambolapicker.Utils.SessionSharedPrefs;
+import com.example.naveen.tambolapicker.Utils.Utilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class NumbersDisplay extends AppCompatActivity {
@@ -44,6 +47,7 @@ public class NumbersDisplay extends AppCompatActivity {
     LinearLayout startstopButtons, boardLinearLayout;
     List<TextView> textViewList;
     ViewGroup completeLayout;
+    private TextToSpeech textToSpeech;
 
 
     @Override
@@ -73,7 +77,7 @@ public class NumbersDisplay extends AppCompatActivity {
         timeButtons.check(SessionSharedPrefs.getInstance().getTimeButtonChecked());
         //Getting numbers array
         if (fromButton == 0) {
-            initialize();
+            initializeNumber();
             randamize();
             saveNumbersInPrefs();
         }
@@ -112,10 +116,20 @@ public class NumbersDisplay extends AppCompatActivity {
         });
         //Check if autoSwitch is on or off
         checkAutoSwitch();
-        timeButtons.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                setAnimatorDuration();
+        timeButtons.setOnCheckedChangeListener((group, checkedId) -> setAnimatorDuration());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initialize();
+    }
+
+    private void initialize() {
+        textToSpeech = new TextToSpeech(getApplicationContext(), status -> {
+            if (status != TextToSpeech.ERROR) {
+                Utilities.printLog("text to speech is set");
+                textToSpeech.setLanguage(Locale.ENGLISH);
             }
         });
     }
@@ -203,7 +217,7 @@ public class NumbersDisplay extends AppCompatActivity {
         }
     }
 
-    public void initialize() {
+    public void initializeNumber() {
         for (int i = 0; i < num.length; i++) {
             num[i] = i + 1;
         }
@@ -261,12 +275,15 @@ public class NumbersDisplay extends AppCompatActivity {
                 textViewList.get(num[position - 1] - 1).setBackgroundResource(R.drawable.complete_background);
                 textViewList.get(num[position - 1] - 1).setTextColor(Color.WHITE);
             }
-            numberDisplayText.setText(String.valueOf(num[position]));
+            String number = String.valueOf(num[position]);
+            numberDisplayText.setText(number);
+            textToSpeech.speak(number, TextToSpeech.QUEUE_FLUSH, null);
             textViewList.get(num[position] - 1).setBackgroundResource(R.drawable.current_background);
             textViewList.get(num[position] - 1).setTypeface(Typeface.DEFAULT_BOLD);
             position += 1;
             SessionSharedPrefs.getInstance().setPosition(position);
             if (position >= num.length) {
+                textToSpeech.speak("Board completed",TextToSpeech.QUEUE_ADD,null);
                 if (fromNext) {
                     Toast.makeText(this, "All the numbers got completed", Toast.LENGTH_LONG).show();
                 } else {
@@ -288,6 +305,15 @@ public class NumbersDisplay extends AppCompatActivity {
                 TransitionManager.beginDelayedTransition(completeLayout);
             }
             boardLinearLayout.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
         }
     }
 }
