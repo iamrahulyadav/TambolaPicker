@@ -4,6 +4,7 @@
           package="com.example.naveen.tambolapicker">
 
     <application
+        android:name=".TambolaPicker"
         android:allowBackup="true"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"

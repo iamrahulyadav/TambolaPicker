@@ -3,7 +3,6 @@ package com.example.naveen.tambolapicker.Activities;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -26,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.naveen.tambolapicker.R;
+import com.example.naveen.tambolapicker.Utils.SessionSharedPrefs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +34,6 @@ import java.util.Random;
 public class NumbersDisplay extends AppCompatActivity {
     public static final String TAG = "naveen.tambolapicker";
     int[] num = new int[90];
-    SharedPreferences pref;
-    SharedPreferences.Editor editor;
     ObjectAnimator animator;
     ProgressBar progress1;
     int position = 0;
@@ -69,12 +67,10 @@ public class NumbersDisplay extends AppCompatActivity {
         textViewList = new ArrayList<>();
         completeLayout = (ViewGroup) findViewById(R.id.completeLayout);
         //Setting Shared Preference
-        pref = getSharedPreferences("com.example.naveen.tambolapicker", MODE_PRIVATE);
-        editor = pref.edit();
-        automaticSwitch.setChecked(pref.getBoolean("autoSwitch", true));
+        automaticSwitch.setChecked(SessionSharedPrefs.getInstance().getAutoSwitch());
         //initialize variables
-        position = pref.getInt("position", 0);
-        timeButtons.check(pref.getInt("timeButtonChecked", R.id.seconds_10));
+        position = SessionSharedPrefs.getInstance().getPosition();
+        timeButtons.check(SessionSharedPrefs.getInstance().getTimeButtonChecked());
         //Getting numbers array
         if (fromButton == 0) {
             initialize();
@@ -183,16 +179,14 @@ public class NumbersDisplay extends AppCompatActivity {
             progress1.setVisibility(View.VISIBLE);
             startstopButtons.setVisibility(View.VISIBLE);
             setAnimatorDuration();
-            editor.putBoolean("autoSwitch", true);
-            editor.commit();
+            SessionSharedPrefs.getInstance().setAutoSwitch(true);
         } else {
             nextButton.setVisibility(View.VISIBLE);
             timeButtons.setVisibility(View.GONE);
             progress1.setVisibility(View.GONE);
             startstopButtons.setVisibility(View.GONE);
             animator.cancel();
-            editor.putBoolean("autoSwitch", false);
-            editor.commit();
+            SessionSharedPrefs.getInstance().setAutoSwitch(false);
         }
     }
 
@@ -200,12 +194,10 @@ public class NumbersDisplay extends AppCompatActivity {
         switch (timeButtons.getCheckedRadioButtonId()) {
             case R.id.seconds_10:
                 animator.setDuration(10 * 1000);
-                editor.putInt("timeButtonChecked", R.id.seconds_10);
-                editor.commit();
+                SessionSharedPrefs.getInstance().setTimeButtonChecked(R.id.seconds_10);
                 break;
             case R.id.seconds_20:
-                editor.putInt("timeButtonChecked", R.id.seconds_20);
-                editor.commit();
+                SessionSharedPrefs.getInstance().setTimeButtonChecked(R.id.seconds_20);
                 animator.setDuration(20 * 1000);
                 break;
         }
@@ -229,27 +221,20 @@ public class NumbersDisplay extends AppCompatActivity {
     }
 
     public void saveNumbersInPrefs() {
-        String numbers = "";
-        for (int i = 0; i < num.length - 1; i++) {
-            numbers = numbers + String.valueOf(num[i]) + ",";
-        }
-        numbers = numbers + String.valueOf(num[num.length - 1]);
-        editor.putString("numberArray", numbers);
-        editor.putBoolean("numThere", true);
-        editor.commit();
-        Log.i(TAG, numbers);
-
+        SessionSharedPrefs.getInstance().setNumberArray(num);
+        SessionSharedPrefs.getInstance().setNumThere(true);
     }
 
     public void getNumbersFromPrefs() {
-        String numbers = pref.getString("numberArray", null);
-        if (numbers != null) {
-            String[] number = numbers.split(",");
-            for (int i = 0; i < number.length; i++) {
-                num[i] = Integer.parseInt(number[i]);
-            }
-            Log.i(TAG, num[0] + "," + num[1] + "," + num[2] + "," + num[3]);
-        }
+        num = SessionSharedPrefs.getInstance().getNumberArray();
+//        String numbers = pref.getString("numberArray", null);
+//        if (numbers != null) {
+//            String[] number = numbers.split(",");
+//            for (int i = 0; i < number.length; i++) {
+//                num[i] = Integer.parseInt(number[i]);
+//            }
+//            Log.i(TAG, num[0] + "," + num[1] + "," + num[2] + "," + num[3]);
+//        }
     }
 
     public void startMethod(View view) {
@@ -280,8 +265,7 @@ public class NumbersDisplay extends AppCompatActivity {
             textViewList.get(num[position] - 1).setBackgroundResource(R.drawable.current_background);
             textViewList.get(num[position] - 1).setTypeface(Typeface.DEFAULT_BOLD);
             position += 1;
-            editor.putInt("position", position);
-            editor.commit();
+            SessionSharedPrefs.getInstance().setPosition(position);
             if (position >= num.length) {
                 if (fromNext) {
                     Toast.makeText(this, "All the numbers got completed", Toast.LENGTH_LONG).show();
