@@ -1,4 +1,4 @@
-package com.example.naveen.tambolapicker;
+package com.example.naveen.tambolapicker.Activities;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -23,6 +24,8 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.naveen.tambolapicker.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +66,7 @@ public class NumbersDisplay extends AppCompatActivity {
         automaticSwitch = (Switch) findViewById(R.id.automaticSwitch);
         startstopButtons = (LinearLayout) findViewById(R.id.startstopButtons);
         boardLinearLayout = (LinearLayout) findViewById(R.id.boardLinearLayout);
-        textViewList = new ArrayList<TextView>();
+        textViewList = new ArrayList<>();
         completeLayout = (ViewGroup) findViewById(R.id.completeLayout);
         //Setting Shared Preference
         pref = getSharedPreferences("com.example.naveen.tambolapicker", MODE_PRIVATE);
@@ -80,7 +83,9 @@ public class NumbersDisplay extends AppCompatActivity {
         }
         if (fromButton == 1) {
             getNumbersFromPrefs();
-            numberDisplayText.setText(String.valueOf(num[position - 1]));
+            if (position >= 0) {
+                numberDisplayText.setText(String.valueOf(num[position - 1]));
+            }
         }
         //Setting the Board
         setGameBoard();
@@ -117,6 +122,17 @@ public class NumbersDisplay extends AppCompatActivity {
                 setAnimatorDuration();
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void setGameBoard() {
