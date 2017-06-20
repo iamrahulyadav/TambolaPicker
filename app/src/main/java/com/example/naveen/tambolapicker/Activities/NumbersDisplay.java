@@ -243,11 +243,13 @@ public class NumbersDisplay extends AppCompatActivity {
 
     public void getNumbersFromPrefs() {
         String numbers = pref.getString("numberArray", null);
-        String[] number = numbers.split(",");
-        for (int i = 0; i < number.length; i++) {
-            num[i] = Integer.parseInt(number[i]);
+        if (numbers != null) {
+            String[] number = numbers.split(",");
+            for (int i = 0; i < number.length; i++) {
+                num[i] = Integer.parseInt(number[i]);
+            }
+            Log.i(TAG, num[0] + "," + num[1] + "," + num[2] + "," + num[3]);
         }
-        Log.i(TAG, num[0] + "," + num[1] + "," + num[2] + "," + num[3]);
     }
 
     public void startMethod(View view) {
