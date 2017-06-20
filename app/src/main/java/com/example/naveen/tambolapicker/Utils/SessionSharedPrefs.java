@@ -15,6 +15,7 @@ public class SessionSharedPrefs {
     private static final String AUTO_SWITCH = "autoSwitch";
     private static final String TIME_BUTTON_CLICKED = "timeButtonChecked";
     private static final String NUMBER_ARRAY = "numberArray";
+    private static final String NUMBER_THERE = "numThere";
     private final SharedPreferences pref;
     private final SharedPreferences.Editor editor;
 
@@ -84,5 +85,15 @@ public class SessionSharedPrefs {
         }
         return num;
     }
+
+    public void setNumThere(boolean NumThere){
+        editor.putBoolean(NUMBER_THERE, NumThere);
+        editor.commit();
+    }
+
+    public boolean getNumThere(){
+        return pref.getBoolean(NUMBER_THERE,false);
+    }
+
 
 }
