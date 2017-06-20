@@ -6,4 +6,6 @@
     <color name="backgroundColor">#FFF</color>
     <color name="TextColor">#ffffff</color>
     <color name="ButtonTextColor">#000</color>
+    <color name="currentNumberBack">#e22d00</color>
+    <color name="completedNumberBack">#00b5e2</color>
 </resources>
