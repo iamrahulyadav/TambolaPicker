@@ -240,9 +240,9 @@ public class NumbersDisplay extends AppCompatActivity {
     }
 
     public void randamize() {
+        Random ran = new Random();
         for (int i = 0; i < num.length; i++) {
             int temp, r;
-            Random ran = new Random();
             r = ran.nextInt(num.length);
             temp = num[i];
             num[i] = num[r];
