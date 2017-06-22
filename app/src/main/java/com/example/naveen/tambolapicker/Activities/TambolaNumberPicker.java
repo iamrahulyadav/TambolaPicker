@@ -9,15 +9,19 @@ import android.widget.Button;
 import com.example.naveen.tambolapicker.R;
 import com.example.naveen.tambolapicker.Utils.SessionSharedPrefs;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class TambolaNumberPicker extends AppCompatActivity {
     SessionSharedPrefs sessionSharedPrefs;
-    private Button previousNumber;
+    @BindView(R.id.previousNumber)
+    Button previousNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tambola_number_picker);
-        previousNumber = (Button) findViewById(R.id.previousNumber);
+        ButterKnife.bind(this);
         sessionSharedPrefs = SessionSharedPrefs.getInstance();
     }
 

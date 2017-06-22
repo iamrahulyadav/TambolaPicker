@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.TransitionManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +20,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,19 +34,30 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class NumbersDisplay extends AppCompatActivity {
-    public static final String TAG = "naveen.tambolapicker";
     int[] num = new int[90];
     ObjectAnimator animator;
-    ProgressBar progress1;
     int position = 0;
-    TextView numberDisplayText;
-    Switch automaticSwitch;
-    RadioGroup timeButtons;
-    Button nextButton;
-    LinearLayout startstopButtons, boardLinearLayout;
     List<TextView> textViewList;
-    ViewGroup completeLayout;
+    @BindView(R.id.automaticSwitch)
+    Switch automaticSwitch;
+    @BindView(R.id.timeButtons)
+    RadioGroup timeButtons;
+    @BindView(R.id.startstopButtons)
+    LinearLayout startstopButtons;
+    @BindView(R.id.progress1)
+    ProgressBar progress1;
+    @BindView(R.id.numberDisplayText)
+    TextView numberDisplayText;
+    @BindView(R.id.nextButton)
+    Button nextButton;
+    @BindView(R.id.boardLinearLayout)
+    LinearLayout boardLinearLayout;
+    @BindView(R.id.completeLayout)
+    ScrollView completeLayout;
     private TextToSpeech textToSpeech;
 
 
@@ -54,22 +65,15 @@ public class NumbersDisplay extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_numbers_display);
+        ButterKnife.bind(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         Intent intent = getIntent();
         int fromButton = intent.getIntExtra("From_Button", -1);
-        Log.i(TAG, "From_Button = " + fromButton);
+        Utilities.printLog("From_Button = " + fromButton);
         String TITLE = intent.getStringExtra("Title");
         getSupportActionBar().setTitle(TITLE);
         //initialize all Views
-        numberDisplayText = (TextView) findViewById(R.id.numberDisplayText);
-        timeButtons = (RadioGroup) findViewById(R.id.timeButtons);
-        nextButton = (Button) findViewById(R.id.nextButton);
-        progress1 = (ProgressBar) findViewById(R.id.progress1);
-        automaticSwitch = (Switch) findViewById(R.id.automaticSwitch);
-        startstopButtons = (LinearLayout) findViewById(R.id.startstopButtons);
-        boardLinearLayout = (LinearLayout) findViewById(R.id.boardLinearLayout);
         textViewList = new ArrayList<>();
-        completeLayout = (ViewGroup) findViewById(R.id.completeLayout);
         //Setting Shared Preference
         automaticSwitch.setChecked(SessionSharedPrefs.getInstance().getAutoSwitch());
         //initialize variables
@@ -87,10 +91,31 @@ public class NumbersDisplay extends AppCompatActivity {
                 numberDisplayText.setText(String.valueOf(num[position - 1]));
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initialize();
+    }
+
+    private void initialize() {
+        textToSpeech = new TextToSpeech(getApplicationContext(), status -> {
+            if (status != TextToSpeech.ERROR) {
+                Utilities.printLog("text to speech is set");
+                textToSpeech.setLanguage(Locale.ENGLISH);
+            }
+        });
         //Setting the Board
         setGameBoard();
-
         //Animation setting up
+        setAnimator();
+        //Check if autoSwitch is on or off
+        checkAutoSwitch();
+        timeButtons.setOnCheckedChangeListener((group, checkedId) -> setAnimatorDuration());
+    }
+
+    private void setAnimator() {
         animator = ObjectAnimator.ofInt(progress1, "progress", 100, 0);
         setAnimatorDuration();
         animator.setInterpolator(null);
@@ -114,24 +139,7 @@ public class NumbersDisplay extends AppCompatActivity {
                 changeNumber(false);
             }
         });
-        //Check if autoSwitch is on or off
-        checkAutoSwitch();
-        timeButtons.setOnCheckedChangeListener((group, checkedId) -> setAnimatorDuration());
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        initialize();
-    }
-
-    private void initialize() {
-        textToSpeech = new TextToSpeech(getApplicationContext(), status -> {
-            if (status != TextToSpeech.ERROR) {
-                Utilities.printLog("text to speech is set");
-                textToSpeech.setLanguage(Locale.ENGLISH);
-            }
-        });
     }
 
     @Override
@@ -241,18 +249,11 @@ public class NumbersDisplay extends AppCompatActivity {
 
     public void getNumbersFromPrefs() {
         num = SessionSharedPrefs.getInstance().getNumberArray();
-//        String numbers = pref.getString("numberArray", null);
-//        if (numbers != null) {
-//            String[] number = numbers.split(",");
-//            for (int i = 0; i < number.length; i++) {
-//                num[i] = Integer.parseInt(number[i]);
-//            }
-//            Log.i(TAG, num[0] + "," + num[1] + "," + num[2] + "," + num[3]);
-//        }
     }
 
     public void startMethod(View view) {
         if (position < num.length) {
+            textToSpeech.speak("Number picking started.", TextToSpeech.QUEUE_FLUSH, null);
             animator.start();
         }
     }
@@ -283,7 +284,7 @@ public class NumbersDisplay extends AppCompatActivity {
             position += 1;
             SessionSharedPrefs.getInstance().setPosition(position);
             if (position >= num.length) {
-                textToSpeech.speak("Board completed",TextToSpeech.QUEUE_ADD,null);
+                textToSpeech.speak("Board completed", TextToSpeech.QUEUE_ADD, null);
                 if (fromNext) {
                     Toast.makeText(this, "All the numbers got completed", Toast.LENGTH_LONG).show();
                 } else {
