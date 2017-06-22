@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.naveen.tambolapicker.R;
+import com.example.naveen.tambolapicker.Utils.CrashLyticsUtil;
 import com.example.naveen.tambolapicker.Utils.SessionSharedPrefs;
 
 import butterknife.BindView;
@@ -39,6 +40,7 @@ public class TambolaNumberPicker extends AppCompatActivity {
     }
 
     public void previousNumberPicking(View view) {
+        CrashLyticsUtil.logContinueNumberEvent();
         Intent intent = new Intent(this, NumbersDisplay.class);
         intent.putExtra("From_Button", 1);
         intent.putExtra("Title", "Continue Number Picking");
@@ -47,6 +49,7 @@ public class TambolaNumberPicker extends AppCompatActivity {
     }
 
     public void newNumberPicking(View view) {
+        CrashLyticsUtil.logNewNumberEvent();
         Intent intent = new Intent(this, NumbersDisplay.class);
         intent.putExtra("From_Button", 0);
         intent.putExtra("Title", "New Number Picking");

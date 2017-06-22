@@ -25,7 +25,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.answers.CustomEvent;
 import com.example.naveen.tambolapicker.R;
+import com.example.naveen.tambolapicker.Utils.CrashLyticsUtil;
 import com.example.naveen.tambolapicker.Utils.SessionSharedPrefs;
 import com.example.naveen.tambolapicker.Utils.Utilities;
 
@@ -196,6 +198,8 @@ public class NumbersDisplay extends AppCompatActivity {
 
     public void checkAutoSwitch() {
         if (automaticSwitch.isChecked()) {
+            CrashLyticsUtil.logCustomerEvent(new CustomEvent("Automatic")
+                    .putCustomAttribute("position", position));
             nextButton.setVisibility(View.GONE);
             timeButtons.setVisibility(View.VISIBLE);
             progress1.setVisibility(View.VISIBLE);
@@ -203,6 +207,8 @@ public class NumbersDisplay extends AppCompatActivity {
             setAnimatorDuration();
             SessionSharedPrefs.getInstance().setAutoSwitch(true);
         } else {
+            CrashLyticsUtil.logCustomerEvent(new CustomEvent("Manual")
+                    .putCustomAttribute("position", position));
             nextButton.setVisibility(View.VISIBLE);
             timeButtons.setVisibility(View.GONE);
             progress1.setVisibility(View.GONE);
@@ -215,10 +221,12 @@ public class NumbersDisplay extends AppCompatActivity {
     public void setAnimatorDuration() {
         switch (timeButtons.getCheckedRadioButtonId()) {
             case R.id.seconds_10:
+                CrashLyticsUtil.logCustomerEvent(new CustomEvent("10 seconds"));
                 animator.setDuration(10 * 1000);
                 SessionSharedPrefs.getInstance().setTimeButtonChecked(R.id.seconds_10);
                 break;
             case R.id.seconds_20:
+                CrashLyticsUtil.logCustomerEvent(new CustomEvent("20 seconds"));
                 SessionSharedPrefs.getInstance().setTimeButtonChecked(R.id.seconds_20);
                 animator.setDuration(20 * 1000);
                 break;
@@ -253,12 +261,18 @@ public class NumbersDisplay extends AppCompatActivity {
 
     public void startMethod(View view) {
         if (position < num.length) {
+            CrashLyticsUtil.logCustomerEvent(new CustomEvent("AutoStarted")
+                    .putCustomAttribute("position", position)
+                    .putCustomAttribute("time", timeButtons.getCheckedRadioButtonId() == R.id.seconds_10 ? 10 : 20));
             textToSpeech.speak("Number picking started.", TextToSpeech.QUEUE_FLUSH, null);
             animator.start();
         }
     }
 
     public void stopMethod(View view) {
+        CrashLyticsUtil.logCustomerEvent(new CustomEvent("AutoStopped")
+                .putCustomAttribute("position", position)
+                .putCustomAttribute("time", timeButtons.getCheckedRadioButtonId() == R.id.seconds_10 ? 10 : 20));
         animator.cancel();
     }
 
@@ -297,6 +311,7 @@ public class NumbersDisplay extends AppCompatActivity {
 
     public void boardButton(View view) {
         if (boardLinearLayout.getVisibility() == View.GONE) {
+            CrashLyticsUtil.logCustomerEvent(new CustomEvent("See Board"));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 TransitionManager.beginDelayedTransition(completeLayout);
             }
